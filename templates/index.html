@@ -2,14 +2,39 @@
 <html>
 <head>
     <title>Word Hunt Solver</title>
+    <link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
     <h1>Word Hunt Solver</h1>
+
     <form method="post">
-        <label for="input_grid">Enter the grid:</label>
-        <input type="text" id="input_grid" name="input_grid" required>
+        <input type="hidden" id="input_grid" name="input_grid" required>
+        <label>Enter the grid:</label>
+        <div id="board-grid">
+          <input maxlength="1">
+          <input maxlength="1">
+          <input maxlength="1">
+          <input maxlength="1">
+
+          <input maxlength="1">
+          <input maxlength="1">
+          <input maxlength="1">
+          <input maxlength="1">
+
+          <input maxlength="1">
+          <input maxlength="1">
+          <input maxlength="1">
+          <input maxlength="1">
+
+          <input maxlength="1">
+          <input maxlength="1">
+          <input maxlength="1">
+          <input maxlength="1">
+        </div>
+
         <button type="submit">Solve</button>
     </form>
+
     {% if results %}
     <h2>Results</h2>
     <ul>
@@ -18,5 +43,82 @@
         {% endfor %}
     </ul>
     {% endif %}
+
+    <script>
+      const GRID_SIZE = 4;
+      const grid = document.getElementById("board-grid");
+      const cells = Array.from(grid.querySelectorAll("input"));
+      const hiddenInput = document.getElementById("input_grid");
+      var curr_cell_count = 0;
+
+      // Focus first cell initially
+      if (cells.length > 0) {
+        cells[0].focus();
+      }
+
+      // Auto-advance + backspace behavior
+      cells.forEach((cell, idx) => {
+        cell.addEventListener("input", (e) => {
+          const val = e.target.value.toUpperCase();
+          e.target.value = val.slice(-1); // only last char, uppercase
+
+          if (e.target.value) {
+            if (idx < cells.length - 1) {
+            cells[idx + 1].focus();
+            curr_cell_count++;
+            console.log(curr_cell_count);
+          } else if (idx == cells.length - 1) {
+            curr_cell_count++;
+            console.log(curr_cell_count);
+          }
+        }});
+
+        cell.addEventListener("keydown", (e) => {
+          const row = Math.floor(idx / GRID_SIZE);
+          const col = idx % GRID_SIZE;
+
+          if (e.key === "Backspace" && !cell.value && idx > 0) {
+            cells[idx - 1].focus();
+            e.preventDefault();
+          }
+          if (e.key === "Backspace" && cell.value) {
+            curr_cell_count--;
+            console.log(curr_cell_count);
+          }
+          if (e.key === "ArrowRight" && col < GRID_SIZE - 1) {
+            cells[idx + 1].focus();
+            e.preventDefault();
+          }
+          if (e.key === "ArrowLeft" && col > 0) {
+            cells[idx - 1].focus();
+            e.preventDefault();
+          }
+          if (e.key === "ArrowDown" && row < GRID_SIZE - 1) {
+            cells[idx + GRID_SIZE].focus();
+            e.preventDefault();
+          }
+          if (e.key === "ArrowUp" && row > 0) {
+            cells[idx - GRID_SIZE].focus();
+            e.preventDefault();
+          }
+          if (e.key === "Enter" && curr_cell_count == GRID_SIZE * GRID_SIZE) {
+            console.log("Enter pressed");
+            const letters = cells.map(c => (c.value || "").toLowerCase());
+            hiddenInput.value = letters.join("");
+          }
+          if (e.key === "Enter" && curr_cell_count < GRID_SIZE * GRID_SIZE) {
+            console.log("Enter pressed but not all cells are filled");
+            alert("Not all cells are filled");
+            e.preventDefault();
+          }
+        });
+      });
+
+      // On form submit, pack the 16 letters into the hidden input_grid
+      document.querySelector("form").addEventListener("submit", (e) => {
+        const letters = cells.map(c => (c.value || "").toLowerCase());
+        hiddenInput.value = letters.join("");
+      });
+    </script>
 </body>
 </html>
