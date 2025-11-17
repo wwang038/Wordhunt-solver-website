@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Word Hunt Solver</title>
+</head>
+<body>
+    <h1>Word Hunt Solver</h1>
+    <form method="post">
+        <label for="input_grid">Enter the grid:</label>
+        <input type="text" id="input_grid" name="input_grid" required>
+        <button type="submit">Solve</button>
+    </form>
+    {% if results %}
+    <h2>Results</h2>
+    <ul>
+        {% for result in results %}
+        <li>{{ result[0] }} ({{ result[1] }})</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</body>
+</html>
