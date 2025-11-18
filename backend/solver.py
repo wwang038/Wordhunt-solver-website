@@ -64,7 +64,7 @@ def load_dictionary(dictionary_path: str | None = None) -> TrieMap:
         trie.load_from_file(dictionary_path)
     else:
 
-        trie.load_from_file("backend/words_alpha.txt")
+        trie.load_from_file("backend/dictionary.txt")
     
     return trie
 

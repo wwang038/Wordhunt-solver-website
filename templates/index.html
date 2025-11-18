@@ -49,7 +49,7 @@
       const grid = document.getElementById("board-grid");
       const cells = Array.from(grid.querySelectorAll("input"));
       const hiddenInput = document.getElementById("input_grid");
-      var curr_cell_count = 0;
+      let curr_cell_count = 0;
 
       // Focus first cell initially
       if (cells.length > 0) {
@@ -60,7 +60,7 @@
       cells.forEach((cell, idx) => {
         cell.addEventListener("input", (e) => {
           const val = e.target.value.toUpperCase();
-          e.target.value = val.slice(-1); // only last char, uppercase
+          e.target.value = val.slice(-1);
 
           if (e.target.value) {
             if (idx < cells.length - 1) {
@@ -116,8 +116,14 @@
 
       // On form submit, pack the 16 letters into the hidden input_grid
       document.querySelector("form").addEventListener("submit", (e) => {
-        const letters = cells.map(c => (c.value || "").toLowerCase());
-        hiddenInput.value = letters.join("");
+        if (curr_cell_count < GRID_SIZE * GRID_SIZE) {
+          alert("Not all cells are filled");
+          e.preventDefault();
+          
+        } else {
+          const letters = cells.map(c => (c.value || "").toLowerCase());
+          hiddenInput.value = letters.join("");
+        }
       });
     </script>
 </body>

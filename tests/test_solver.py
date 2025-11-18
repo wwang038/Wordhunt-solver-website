@@ -266,7 +266,7 @@ class TestSolverIntegration(unittest.TestCase):
 class TestLoadDictionary(unittest.TestCase):
     
     def test_load_dictionary_custom_path(self):
-        dictionary = load_dictionary("words_alpha.txt")
+        dictionary = load_dictionary("dictionary.txt")
         self.assertIsInstance(dictionary, TrieMap)
         self.assertGreater(dictionary.size, 0)
     

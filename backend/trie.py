@@ -52,10 +52,7 @@ class TrieMap:
                     line = line.strip()
                     if not line:
                         continue
-                    if line.startswith('"') and '":' in line:
-                        word = line.split('":')[0].strip('"').lower()
-                    else:
-                        word = line.lower()
+                    word = line.lower()
                     if len(word) >= min_length and word.isalpha():
                         self.insert(word)
     
