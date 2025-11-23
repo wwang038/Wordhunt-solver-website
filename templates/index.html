@@ -6,6 +6,7 @@
 </head>
 <body>
     <h1>Word Hunt Solver</h1>
+    <a href="/records" class="back-link" style="margin-bottom: 20px; display: inline-block;">View Top Records →</a>
 
     <form method="post">
         <input type="hidden" id="input_grid" name="input_grid" required>
@@ -36,14 +37,16 @@
     </form>
 
     {% if results %}
-    <h2>Results</h2>
+    <h2>Results (Total Score: {{ total_score }})</h2>
     <ul>
         {% for result in results %}
         <li>{{ result[0] }} ({{ result[1] }})</li>
         {% endfor %}
     </ul>
     {% endif %}
-
+    {% if results|length == 0 and submitted %}
+    <h2>No words found. Make sure you have filled the cells correctly.</h2>
+    {% endif %}
     <script>
       const GRID_SIZE = 4;
       const grid = document.getElementById("board-grid");

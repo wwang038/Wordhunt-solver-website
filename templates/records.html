@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Top Records - Word Hunt Solver</title>
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <h1>Top 20 Records</h1>
+    
+    <div class="records-container">
+        {% if records %}
+        <table>
+            <thead>
+                <tr>
+                    <th class="rank">Rank</th>
+                    <th>Board</th>
+                    <th class="score">Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td class="rank">{{ loop.index }}</td>
+                    <td>
+                        <div class="board-display">
+                            {% if record|length >= 2 %}
+                                {% set board = record[0] if record[0] else record[1] %}
+                                {% set board_str = board|string %}
+                                {% if board_str|length == 16 %}
+                                    {% for i in range(0, 16, 4) %}
+                                        {{ board_str[i:i+4]|upper }}
+                                        {% if i < 12 %}<br>{% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    {{ board_str|upper }}
+                                {% endif %}
+                            {% else %}
+                                {{ record[0]|string|upper }}
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="score">
+                        {% if record|length >= 2 %}
+                            {{ record[-1] if record[-1] else record[1] }}
+                        {% else %}
+                            {{ record[0] }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-records">
+            No records found yet. Be the first to solve a board!
+        </div>
+        {% endif %}
+        
+        <a href="/" class="back-link">← Back to Solver</a>
+    </div>
+</body>
+</html>
+

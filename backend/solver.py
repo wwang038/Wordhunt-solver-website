@@ -56,6 +56,8 @@ class Solver:
             return (length - 3) * 400
         return (length - 3) * 400 + 200
 
+    def get_total_score(self, found_words: list[tuple[str, int]]) -> int:
+        return sum(score for _, score in found_words)
 
 def load_dictionary(dictionary_path: str | None = None) -> TrieMap:
     trie = TrieMap()
@@ -97,13 +99,14 @@ def console_solver():
     for i, (word, score) in enumerate(results, 1):
         print(f"{i}. {word} ({score})")
 
-def web_solver(input_grid: str) -> list[tuple[str, int]]:
+def web_solver(input_grid: str) -> tuple[list[tuple[str, int]], int]:
 
     dictionary = load_dictionary()
     board = Board(input_grid)
     solver = Solver(dictionary)
     results = solver.solve(board)
-    return results
+    total_score = solver.get_total_score(results)
+    return results, total_score
 
 if __name__ == "__main__":
     console_solver()

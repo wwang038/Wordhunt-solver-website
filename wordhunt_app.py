@@ -8,24 +8,26 @@ host_string = "wordhunt-db.ch8ues0g2yx6.us-east-2.rds.amazonaws.com"
 app = Flask(__name__)
 
 
-
-
-
-
-
-def random_string():
-    alphabet = 'abcdefghijklmnopqrstuvwxyz'
-    random_string = ''
-    for i in range(16):
-        random_string += random.choice(alphabet)
-    return random_string
-
-
+@app.route('/records', methods = ['GET'])
+def records():
+    conn = psycopg2.connect(
+    host=host_string,
+    database="postgres",
+    user="wwang038",
+    password="Password0988",
+    port=5432
+)
+    cur = conn.cursor()
+    cur.execute('''
+    SELECT * FROM board_values ORDER BY value DESC LIMIT 20
+    ''')
+    records = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template('records.html', records=records)
 
 @app.route('/', methods = ['GET', 'POST'])
 def index():
-
-    
     conn = psycopg2.connect(
     host=host_string,
     database="postgres",
@@ -34,21 +36,23 @@ def index():
     port=5432
 )
 
-    cur = conn.cursor()
-    random_board = random_string()
-    cur.execute('''
-    INSERT INTO test_table (board, board_value) VALUES (%s, %s) ON CONFLICT (board) DO NOTHING
-    ''', (random_board, 50))
-    conn.commit()
-    cur.close()
     
-    conn.close()
     if request.method == 'POST':
         input_grid = request.form['input_grid']
-        results = web_solver(input_grid)
-        return render_template('index.html', results=results)
+        results, total_score = web_solver(input_grid)
+        cur = conn.cursor()
+
+        cur.execute('''
+        INSERT INTO board_values (board, value) VALUES (%s, %s) ON CONFLICT (board) DO NOTHING
+        ''', (input_grid, total_score))
+        conn.commit()
+        cur.close()
+
+        conn.close()
+        return render_template('index.html', results=results, total_score=total_score, submitted=True)
     else:
-        return render_template('index.html')
+        
+        return render_template('index.html', results = [], submitted=False)
 
 if __name__ == '__main__':
     import os
