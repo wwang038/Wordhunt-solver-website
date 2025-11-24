@@ -338,6 +338,7 @@ tbody tr:hover {
     font-weight: 700;
     color: var(--primary);
     width: 70px;
+    text-align: center;
 }
 
 .board-display {
