@@ -4,63 +4,99 @@
     <title>Word Hunt Solver</title>
     <link rel="stylesheet" href="static/styles.css">
 </head>
-<body>
-    <h1>Word Hunt Solver</h1>
-    <a href="/records" class="back-link" style="margin-bottom: 20px; display: inline-block;">View Top Records →</a>
+<body class="solver-page">
+    <div class="page-wrapper">
+        <header class="page-header">
+            <p class="hero-subtitle">Enter any 4×4 board and instantly surface the highest scoring words.</p>
+            <h1>Word Hunt Solver</h1>
+            <div class="header-actions">
+                <a href="/records" class="link-button">View leaderboard →</a>
+            </div>
+        </header>
 
-    <form method="post">
-        <input type="hidden" id="input_grid" name="input_grid" required>
-        <label>Enter the grid!:</label>
-        <div id="board-grid">
-          <input maxlength="1">
-          <input maxlength="1">
-          <input maxlength="1">
-          <input maxlength="1">
+        <div class="page-grid">
+            <section class="card solver-card">
+                <h2>Enter your board</h2>
+                <p class="card-subtitle">Fill in all 16 squares left-to-right, top-to-bottom. Letters are auto-capitalized.</p>
+                <form method="post" class="solver-form">
+                    <input type="hidden" id="input_grid" name="input_grid" required>
+                    <label for="board-grid">Letter grid</label>
+                    <div id="board-grid">
+                      <input maxlength="1">
+                      <input maxlength="1">
+                      <input maxlength="1">
+                      <input maxlength="1">
 
-          <input maxlength="1">
-          <input maxlength="1">
-          <input maxlength="1">
-          <input maxlength="1">
+                      <input maxlength="1">
+                      <input maxlength="1">
+                      <input maxlength="1">
+                      <input maxlength="1">
 
-          <input maxlength="1">
-          <input maxlength="1">
-          <input maxlength="1">
-          <input maxlength="1">
+                      <input maxlength="1">
+                      <input maxlength="1">
+                      <input maxlength="1">
+                      <input maxlength="1">
 
-          <input maxlength="1">
-          <input maxlength="1">
-          <input maxlength="1">
-          <input maxlength="1">
+                      <input maxlength="1">
+                      <input maxlength="1">
+                      <input maxlength="1">
+                      <input maxlength="1">
+                    </div>
+
+                    <button type="submit">Solve board</button>
+                </form>
+            </section>
+
+            <section class="card results-card">
+                <h2>Results</h2>
+                {% if submitted %}
+                    <div class="stats-grid">
+                        <div class="stat-pill">
+                            <span class="stat-label">Total score</span>
+                            <span class="stat-value">{{ total_score }}</span>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-label">Percentile</span>
+                            <span class="stat-value">{{ better_than_me_percentage }}%</span>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-label">Words found</span>
+                            <span class="stat-value">{{ results|length }}</span>
+                        </div>
+                    </div>
+
+                    {% if results %}
+                        <ul class="results-list">
+                            {% for result in results %}
+                            <li class="result-item">
+                                <span class="word">{{ result[0]|upper }}</span>
+                                <span class="points">{{ result[1] }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="notice">No valid words were detected. Double-check the board input and try again.</p>
+                    {% endif %}
+                {% else %}
+                    <p class="notice">Enter a board on the left to see ranked results here.</p>
+                {% endif %}
+            </section>
         </div>
-
-        <button type="submit">Solve</button>
-    </form>
-
-    {% if results %}
-    <h2>Results (Total Score: {{ total_score }}, better than {{ better_than_me_percentage }}% of all previous valid submissions)</h2>
-    <ul>
-        {% for result in results %}
-        <li>{{ result[0] }} ({{ result[1] }})</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% if results|length == 0 and submitted %}
-    <h2>No words found. Make sure you have filled the cells correctly.</h2>
-    {% endif %}
+    </div>
 
     <script>
       const GRID_SIZE = 4;
       const grid = document.getElementById("board-grid");
       const cells = Array.from(grid.querySelectorAll("input"));
       const hiddenInput = document.getElementById("input_grid");
-      let curr_cell_count = 0;
+      const solverForm = document.querySelector(".solver-form");
 
-      // Focus first cell initially
+      const allCellsFilled = () => cells.every(cell => (cell.value || "").trim().length === 1);
+
       if (cells.length > 0) {
         cells[0].focus();
       }
 
-      // Auto-advance + backspace behavior
       cells.forEach((cell, idx) => {
         cell.addEventListener("input", (e) => {
           const val = e.target.value.toUpperCase();
@@ -68,14 +104,10 @@
 
           if (e.target.value) {
             if (idx < cells.length - 1) {
-            cells[idx + 1].focus();
-            curr_cell_count++;
-            console.log(curr_cell_count);
-          } else if (idx == cells.length - 1) {
-            curr_cell_count++;
-            console.log(curr_cell_count);
+              cells[idx + 1].focus();
+            }
           }
-        }});
+        });
 
         cell.addEventListener("keydown", (e) => {
           const row = Math.floor(idx / GRID_SIZE);
@@ -84,10 +116,6 @@
           if (e.key === "Backspace" && !cell.value && idx > 0) {
             cells[idx - 1].focus();
             e.preventDefault();
-          }
-          if (e.key === "Backspace" && cell.value) {
-            curr_cell_count--;
-            console.log(curr_cell_count);
           }
           if (e.key === "ArrowRight" && col < GRID_SIZE - 1) {
             cells[idx + 1].focus();
@@ -105,29 +133,21 @@
             cells[idx - GRID_SIZE].focus();
             e.preventDefault();
           }
-          if (e.key === "Enter" && curr_cell_count == GRID_SIZE * GRID_SIZE) {
-            console.log("Enter pressed");
-            const letters = cells.map(c => (c.value || "").toLowerCase());
-            hiddenInput.value = letters.join("");
-          }
-          if (e.key === "Enter" && curr_cell_count < GRID_SIZE * GRID_SIZE) {
-            console.log("Enter pressed but not all cells are filled");
-            alert("Not all cells are filled");
+          if (e.key === "Enter" && !allCellsFilled()) {
+            alert("Fill in all 16 cells before solving.");
             e.preventDefault();
           }
         });
       });
 
-      // On form submit, pack the 16 letters into the hidden input_grid
-      document.querySelector("form").addEventListener("submit", (e) => {
-        if (curr_cell_count < GRID_SIZE * GRID_SIZE) {
-          alert("Not all cells are filled");
+      solverForm.addEventListener("submit", (e) => {
+        if (!allCellsFilled()) {
+          alert("Fill in all 16 cells before solving.");
           e.preventDefault();
-          
-        } else {
-          const letters = cells.map(c => (c.value || "").toLowerCase());
-          hiddenInput.value = letters.join("");
+          return;
         }
+        const letters = cells.map(c => (c.value || "").toLowerCase());
+        hiddenInput.value = letters.join("");
       });
     </script>
 </body>

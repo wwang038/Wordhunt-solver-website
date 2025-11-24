@@ -3,6 +3,17 @@ from flask import Flask, request
 from flask import render_template
 from backend.solver import *
 import psycopg2
+from psycopg2.extras import execute_values
+
+VALID_WORD_LENGTHS = list(range(3, 17))
+
+
+def score_for_length(word_length: int) -> int:
+    if word_length == 3:
+        return 100
+    if 4 <= word_length < 6:
+        return (word_length - 3) * 400
+    return (word_length - 3) * 400 + 200
 
 host_string = "wordhunt-db.ch8ues0g2yx6.us-east-2.rds.amazonaws.com"
 app = Flask(__name__)
@@ -28,24 +39,59 @@ def records():
         
 
         cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM board_values;")
+
+        length_score_map = {length: score_for_length(length) for length in VALID_WORD_LENGTHS}
+        raw_length_params = request.args.getlist('length')
+        selected_lengths = []
+        if raw_length_params:
+            for raw_length in raw_length_params:
+                try:
+                    parsed_length = int(raw_length)
+                except (TypeError, ValueError):
+                    continue
+                if parsed_length in VALID_WORD_LENGTHS:
+                    selected_lengths.append(parsed_length)
+            selected_lengths = sorted(set(selected_lengths))
+        if not selected_lengths:
+
+            selected_lengths = VALID_WORD_LENGTHS.copy()
+        selected_scores = [length_score_map[length] for length in selected_lengths]
+
+        cur.execute("""
+            SELECT COUNT(DISTINCT board)
+            FROM board_words
+            WHERE value = ANY(%s);
+        """, (selected_scores,))
         total_records = cur.fetchone()[0]
-        total_pages = (total_records + page_size - 1) // page_size  # Ceiling division
-        
-        # Get records for current page
-        sql_query = "SELECT board, value FROM board_values ORDER BY value DESC LIMIT %s OFFSET %s;"
-        cur.execute(sql_query, (page_size, offset))
-        records = cur.fetchall()
+        total_pages = min((total_records + page_size - 1) // page_size, 10)
+
+        cur.execute("""
+            SELECT board, SUM(value) AS total_value
+            FROM board_words
+            WHERE value = ANY(%s)
+            GROUP BY board
+            ORDER BY total_value DESC
+            LIMIT %s OFFSET %s;
+        """, (selected_scores, page_size, offset))
+        board_records = cur.fetchall()
         cur.close()
         conn.close()
         
         return render_template('records.html', 
-                            records=records, 
+                            records=board_records,
                             page_number=page_number,
                             total_pages=total_pages,
-                            total_records=total_records)
+                            total_records=total_records,
+                            valid_word_lengths=VALID_WORD_LENGTHS,
+                            selected_lengths=selected_lengths,
+                            length_score_map=length_score_map)
     except Exception as e:
-        return render_template('records.html', records=[], error=str(e))
+        return render_template('records.html', 
+                               records=[], 
+                               error=str(e),
+                               valid_word_lengths=VALID_WORD_LENGTHS,
+                               selected_lengths=VALID_WORD_LENGTHS.copy(),
+                               length_score_map={length: score_for_length(length) for length in VALID_WORD_LENGTHS})
 
 @app.route('/', methods = ['GET', 'POST'])
 def index():
@@ -60,6 +106,7 @@ def index():
         input_grid = request.form['input_grid']
         results, total_score = web_solver(input_grid)
         cur = conn.cursor()
+        better_than_me_percentage = 0
         if total_score != 0:
             cur.execute('''
             INSERT INTO board_values (board, value) VALUES (%s, %s) ON CONFLICT (board) DO NOTHING
@@ -72,12 +119,16 @@ def index():
             SELECT COUNT(*) FROM board_values WHERE value >= %s AND value != 0;
                         ''', (total_score,))
             better_than_me = cur.fetchone()[0]
-            better_than_me_percentage = round(((total_records - better_than_me) / (total_records - 1)) * 100, 2)
+            denominator = max(total_records - 1, 1)
+            better_than_me_percentage = round(((total_records - better_than_me) / denominator) * 100, 2)
+            result_rows = [(input_grid, word, score) for word, score in results]
+            if result_rows:
+                execute_values(cur, '''
+                INSERT INTO board_words (board, word, value) 
+                VALUES %s ON CONFLICT (board, word) DO NOTHING
+                ''', result_rows)
             conn.commit()
-            cur.close()
-        else:
-            better_than_me_percentage = 0
-
+        cur.close()
         conn.close()
         return render_template('index.html', results=results, total_score=total_score, submitted=True, better_than_me_percentage=better_than_me_percentage)
         

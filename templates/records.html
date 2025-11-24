@@ -4,74 +4,111 @@
     <title>Top Records - Word Hunt Solver</title>
     <link rel="stylesheet" href="static/styles.css">
 </head>
-<body>
-    <h1>Top Records</h1>
-    {% if total_records %}
-    <p class="records-info">Showing {{ ((page_number - 1) * 20) + 1 }}-{{ [page_number * 20, total_records]|min }} of {{ total_records }} records</p>
-    {% endif %}
-    
-    <div class="records-container">
-        {% if records %}
-        <table>
-            <thead>
-                <tr>
-                    <th class="rank">Rank</th>
-                    <th>Board</th>
-                    <th class="score">Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in records %}
-                <tr>
-                    <td class="rank">{{ ((page_number - 1) * 20) + loop.index }}</td>
-                    <td>
-                        <div class="board-display">
-                            {% set board = record[0] %}
-                            {% set board_str = board|string %}
-                            {% if board_str|length == 16 %}
-                                {% for i in range(0, 16, 4) %}
-                                    {{ board_str[i:i+4]|upper }}
-                                    {% if i < 12 %}<br>{% endif %}
-                                {% endfor %}
-                            {% else %}
-                                {{ board_str|upper }}
-                            {% endif %}
-                        </div>
-                    </td>
-                    <td class="score">{{ record[1] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <div class="no-records">
-            {% if error %}
-                <p>Error loading records: {{ error }}</p>
+<body class="records-page">
+    <div class="page-wrapper">
+        <header class="page-header">
+            <h1>Leaderboard</h1>
+            <p class="hero-subtitle">Filter the leaderboard by the word lengths you care about to re-rank every board.</p>
+            <div class="header-actions">
+                <a href="/" class="link-button">← Back to solver</a>
+            </div>
+        </header>
+
+        <section class="word-filter">
+            <div class="card-header">
+                <h2>Word-length filters</h2>
+                <p class="card-subtitle">We recompute the board totals using only words that match the selected lengths.</p>
+            </div>
+            <form method="get" class="word-length-form">
+                <fieldset>
+                    <div class="length-checkboxes">
+                        {% for length in valid_word_lengths %}
+                        <label>
+                            <input type="checkbox" name="length" value="{{ length }}" {% if length in selected_lengths %}checked{% endif %}>
+                            {{ length }} letters (score {{ length_score_map[length] }})
+                        </label>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+                <input type="hidden" name="page" value="{{ page_number }}">
+                <div class="filter-actions">
+                    <button type="submit">Apply filters</button>
+                    <a class="reset-link" href="/records">Reset</a>
+                </div>
+            </form>
+        </section>
+
+        <section class="records-container">
+            <div class="card-header">
+                
+                <h2><hr>Filtered leaderboard<hr></h2>
+                {% if total_records %}
+                <p class="records-info">Showing {{ ((page_number - 1) * 20) + 1 }}-{{ [page_number * 20, total_records]|min }} of {{ total_records }} boards</p>
+                {% endif %}
+            </div>
+
+            {% if records %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="rank">Rank</th>
+                            <th>Board</th>
+                            <th class="score">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td class="rank">{{ ((page_number - 1) * 20) + loop.index }}</td>
+                            <td>
+                                <div class="board-display">
+                                    {% set board = record[0] %}
+                                    {% set board_str = board|string %}
+                                    {% if board_str|length == 16 %}
+                                        {% for i in range(0, 16, 4) %}
+                                            {{ board_str[i:i+4]|upper }}
+                                            {% if i < 12 %}<br>{% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        {{ board_str|upper }}
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="score">{{ record[1] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% else %}
-                No records found yet. Be the first to solve a board!
+            <div class="no-records">
+                {% if error %}
+                    <p>Error loading records: {{ error }}</p>
+                {% else %}
+                    No boards match those filters yet. Try selecting different lengths.
+                {% endif %}
+            </div>
             {% endif %}
-        </div>
-        {% endif %}
-        
-        {% if total_pages and total_pages > 1 %}
-        <div class="pagination">
-            {% if page_number > 1 %}
-                <a href="/records?page={{ page_number - 1 }}" class="pagination-link">← Previous</a>
-            {% else %}
-                <span class="pagination-link disabled">← Previous</span>
+
+            {% if total_pages and total_pages > 1 %}
+            <div class="pagination">
+                {% if page_number > 1 %}
+                    <a href="/records?page={{ page_number - 1 }}" class="pagination-link">← Previous</a>
+                {% else %}
+                    <span class="pagination-link disabled">← Previous</span>
+                {% endif %}
+                
+                <span class="page-info">Page {{ page_number }} of {{ total_pages }}</span>
+                
+                {% if page_number < total_pages %}
+                    <a href="/records?page={{ page_number + 1 }}" class="pagination-link">Next →</a>
+                {% else %}
+                    <span class="pagination-link disabled">Next →</span>
+                {% endif %}
+            </div>
             {% endif %}
-            
-            <span class="page-info">Page {{ page_number }} of {{ total_pages }}</span>
-            
-            {% if page_number < total_pages %}
-                <a href="/records?page={{ page_number + 1 }}" class="pagination-link">Next →</a>
-            {% else %}
-                <span class="pagination-link disabled">Next →</span>
-            {% endif %}
-        </div>
-        {% endif %}
-        
-        <a href="/" class="back-link">← Back to Solver</a>
+        </section>
     </div>
 </body>
 </html>
