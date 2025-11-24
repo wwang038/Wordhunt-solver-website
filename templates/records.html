@@ -5,7 +5,10 @@
     <link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
-    <h1>Top 20 Records</h1>
+    <h1>Top Records</h1>
+    {% if total_records %}
+    <p class="records-info">Showing {{ ((page_number - 1) * 20) + 1 }}-{{ [page_number * 20, total_records]|min }} of {{ total_records }} records</p>
+    {% endif %}
     
     <div class="records-container">
         {% if records %}
@@ -20,39 +23,51 @@
             <tbody>
                 {% for record in records %}
                 <tr>
-                    <td class="rank">{{ loop.index }}</td>
+                    <td class="rank">{{ ((page_number - 1) * 20) + loop.index }}</td>
                     <td>
                         <div class="board-display">
-                            {% if record|length >= 2 %}
-                                {% set board = record[0] if record[0] else record[1] %}
-                                {% set board_str = board|string %}
-                                {% if board_str|length == 16 %}
-                                    {% for i in range(0, 16, 4) %}
-                                        {{ board_str[i:i+4]|upper }}
-                                        {% if i < 12 %}<br>{% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    {{ board_str|upper }}
-                                {% endif %}
+                            {% set board = record[0] %}
+                            {% set board_str = board|string %}
+                            {% if board_str|length == 16 %}
+                                {% for i in range(0, 16, 4) %}
+                                    {{ board_str[i:i+4]|upper }}
+                                    {% if i < 12 %}<br>{% endif %}
+                                {% endfor %}
                             {% else %}
-                                {{ record[0]|string|upper }}
+                                {{ board_str|upper }}
                             {% endif %}
                         </div>
                     </td>
-                    <td class="score">
-                        {% if record|length >= 2 %}
-                            {{ record[-1] if record[-1] else record[1] }}
-                        {% else %}
-                            {{ record[0] }}
-                        {% endif %}
-                    </td>
+                    <td class="score">{{ record[1] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         {% else %}
         <div class="no-records">
-            No records found yet. Be the first to solve a board!
+            {% if error %}
+                <p>Error loading records: {{ error }}</p>
+            {% else %}
+                No records found yet. Be the first to solve a board!
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if total_pages and total_pages > 1 %}
+        <div class="pagination">
+            {% if page_number > 1 %}
+                <a href="/records?page={{ page_number - 1 }}" class="pagination-link">← Previous</a>
+            {% else %}
+                <span class="pagination-link disabled">← Previous</span>
+            {% endif %}
+            
+            <span class="page-info">Page {{ page_number }} of {{ total_pages }}</span>
+            
+            {% if page_number < total_pages %}
+                <a href="/records?page={{ page_number + 1 }}" class="pagination-link">Next →</a>
+            {% else %}
+                <span class="pagination-link disabled">Next →</span>
+            {% endif %}
         </div>
         {% endif %}
         

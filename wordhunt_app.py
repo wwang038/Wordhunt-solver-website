@@ -10,21 +10,42 @@ app = Flask(__name__)
 
 @app.route('/records', methods = ['GET'])
 def records():
-    conn = psycopg2.connect(
-    host=host_string,
-    database="postgres",
-    user="wwang038",
-    password="Password0988",
-    port=5432
-)
-    cur = conn.cursor()
-    cur.execute('''
-    SELECT * FROM board_values ORDER BY value DESC LIMIT 20
-    ''')
-    records = cur.fetchall()
-    cur.close()
-    conn.close()
-    return render_template('records.html', records=records)
+    try:
+        conn = psycopg2.connect(
+            host=host_string,
+            database="postgres",
+            user="wwang038",
+            password="Password0988",
+            port=5432
+        )
+        page_size = 20
+        # Get page number from query parameter, default to 1
+        page_number = request.args.get('page', 1, type=int)
+        if page_number < 1:
+            page_number = 1
+        
+        offset = (page_number - 1) * page_size
+        
+        # Get total count of records
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM board_values;")
+        total_records = cur.fetchone()[0]
+        total_pages = (total_records + page_size - 1) // page_size  # Ceiling division
+        
+        # Get records for current page
+        sql_query = "SELECT board, value FROM board_values ORDER BY value DESC LIMIT %s OFFSET %s;"
+        cur.execute(sql_query, (page_size, offset))
+        records = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        return render_template('records.html', 
+                             records=records, 
+                             page_number=page_number,
+                             total_pages=total_pages,
+                             total_records=total_records)
+    except Exception as e:
+        return render_template('records.html', records=[], error=str(e))
 
 @app.route('/', methods = ['GET', 'POST'])
 def index():
@@ -35,8 +56,6 @@ def index():
     password="Password0988",
     port=5432
 )
-
-    
     if request.method == 'POST':
         input_grid = request.form['input_grid']
         results, total_score = web_solver(input_grid)
