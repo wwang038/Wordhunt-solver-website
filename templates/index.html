@@ -37,7 +37,7 @@
     </form>
 
     {% if results %}
-    <h2>Results (Total Score: {{ total_score }})</h2>
+    <h2>Results (Total Score: {{ total_score }}, better than {{ better_than_me_percentage }}% of all previous valid submissions)</h2>
     <ul>
         {% for result in results %}
         <li>{{ result[0] }} ({{ result[1] }})</li>
@@ -47,6 +47,7 @@
     {% if results|length == 0 and submitted %}
     <h2>No words found. Make sure you have filled the cells correctly.</h2>
     {% endif %}
+
     <script>
       const GRID_SIZE = 4;
       const grid = document.getElementById("board-grid");

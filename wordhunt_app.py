@@ -19,14 +19,14 @@ def records():
             port=5432
         )
         page_size = 20
-        # Get page number from query parameter, default to 1
+
         page_number = request.args.get('page', 1, type=int)
         if page_number < 1:
             page_number = 1
         
         offset = (page_number - 1) * page_size
         
-        # Get total count of records
+
         cur = conn.cursor()
         cur.execute("SELECT COUNT(*) FROM board_values;")
         total_records = cur.fetchone()[0]
@@ -40,10 +40,10 @@ def records():
         conn.close()
         
         return render_template('records.html', 
-                             records=records, 
-                             page_number=page_number,
-                             total_pages=total_pages,
-                             total_records=total_records)
+                            records=records, 
+                            page_number=page_number,
+                            total_pages=total_pages,
+                            total_records=total_records)
     except Exception as e:
         return render_template('records.html', records=[], error=str(e))
 
@@ -60,15 +60,27 @@ def index():
         input_grid = request.form['input_grid']
         results, total_score = web_solver(input_grid)
         cur = conn.cursor()
-
-        cur.execute('''
-        INSERT INTO board_values (board, value) VALUES (%s, %s) ON CONFLICT (board) DO NOTHING
-        ''', (input_grid, total_score))
-        conn.commit()
-        cur.close()
+        if total_score != 0:
+            cur.execute('''
+            INSERT INTO board_values (board, value) VALUES (%s, %s) ON CONFLICT (board) DO NOTHING
+            ''', (input_grid, total_score))
+            cur.execute('''
+            SELECT COUNT(*) FROM board_values;
+            ''')
+            total_records = cur.fetchone()[0]
+            cur.execute('''
+            SELECT COUNT(*) FROM board_values WHERE value >= %s AND value != 0;
+                        ''', (total_score,))
+            better_than_me = cur.fetchone()[0]
+            better_than_me_percentage = round(((total_records - better_than_me) / (total_records - 1)) * 100, 2)
+            conn.commit()
+            cur.close()
+        else:
+            better_than_me_percentage = 0
 
         conn.close()
-        return render_template('index.html', results=results, total_score=total_score, submitted=True)
+        return render_template('index.html', results=results, total_score=total_score, submitted=True, better_than_me_percentage=better_than_me_percentage)
+        
     else:
         
         return render_template('index.html', results = [], submitted=False)
