@@ -18,6 +18,20 @@ def score_for_length(word_length: int) -> int:
 host_string = "wordhunt-db.ch8ues0g2yx6.us-east-2.rds.amazonaws.com"
 app = Flask(__name__)
 
+@app.route('/test', methods = ['POST', 'GET'])
+def test():
+    if request.method == 'POST':
+        name = request.form["name"]
+        print(name)
+        return f"Hello, {name}"
+    else:
+        return '''
+        <form action="/test" method="POST">
+            <input name="name">
+            <button type="submit">Submit</button>
+        </form>
+    '''
+
 
 @app.route('/records', methods = ['GET'])
 def records():
