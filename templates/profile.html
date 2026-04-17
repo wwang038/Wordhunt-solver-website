@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ profile_username }}'s boards – Word Hunt Solver</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="records-page">
+    <div class="page-wrapper">
+        <header class="page-header">
+            {% if not_found %}
+                <h1>User not found</h1>
+                <p class="hero-subtitle">No player named "{{ profile_username }}" exists.</p>
+            {% else %}
+                <div class="profile-hero-avatar">{{ profile_username[0]|upper }}</div>
+                <h1>{{ profile_username }}</h1>
+                <p class="hero-subtitle">{{ total_records }} board{{ 's' if total_records != 1 }} submitted</p>
+            {% endif %}
+            <div class="header-actions">
+                <a href="/records" class="link-button">← Leaderboard</a>
+                <a href="/" class="link-button">Solver</a>
+                {% if viewer_username %}
+                    {% if is_own_profile %}
+                        <a href="/dashboard" class="link-button user-chip">
+                            <span class="user-chip-avatar">{{ viewer_username[0]|upper }}</span>
+                            My dashboard
+                        </a>
+                    {% else %}
+                        <a href="/user/{{ viewer_username }}" class="link-button user-chip">
+                            <span class="user-chip-avatar">{{ viewer_username[0]|upper }}</span>
+                            {{ viewer_username }}
+                        </a>
+                    {% endif %}
+                    <a href="/logout" class="link-button link-button--muted">Log out</a>
+                {% else %}
+                    <a href="/authentication/google" class="link-button google-btn">
+                        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                        Sign in
+                    </a>
+                {% endif %}
+            </div>
+        </header>
+
+        {% if not not_found %}
+        <section class="records-container">
+            <div class="card-header">
+                <h2><hr>{{ profile_username }}'s boards<hr></h2>
+                {% if total_records %}
+                <p class="records-info">
+                    Showing {{ ((page_number - 1) * 20) + 1 }}–{{ [page_number * 20, total_records]|min }}
+                    of {{ total_records }} boards
+                </p>
+                {% endif %}
+            </div>
+
+            {% if boards %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="rank">Rank</th>
+                            <th>Board</th>
+                            <th class="score">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for board, score in boards %}
+                        <tr>
+                            <td class="rank">{{ ((page_number - 1) * 20) + loop.index }}</td>
+                            <td>
+                                <div class="board-display">
+                                    {% set s = board|string %}
+                                    {% if s|length == 16 %}
+                                        {% for i in range(0, 16, 4) %}
+                                            {{ s[i:i+4]|upper }}{% if i < 12 %}<br>{% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        {{ s|upper }}
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="score">{{ score }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="no-records">No boards submitted yet.</div>
+            {% endif %}
+
+            {% if total_pages and total_pages > 1 %}
+            <div class="pagination">
+                {% if page_number > 1 %}
+                    <a href="/user/{{ profile_username }}?page={{ page_number - 1 }}" class="pagination-link">← Previous</a>
+                {% else %}
+                    <span class="pagination-link disabled">← Previous</span>
+                {% endif %}
+
+                <span class="page-info">Page {{ page_number }} of {{ total_pages }}</span>
+
+                {% if page_number < total_pages %}
+                    <a href="/user/{{ profile_username }}?page={{ page_number + 1 }}" class="pagination-link">Next →</a>
+                {% else %}
+                    <span class="pagination-link disabled">Next →</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+    </div>
+</body>
+</html>

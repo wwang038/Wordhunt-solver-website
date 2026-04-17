@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Choose a username – Word Hunt Solver</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="auth-page">
+    <div class="page-wrapper auth-wrapper">
+        <header class="page-header">
+            <h1>One last step</h1>
+            <p class="hero-subtitle">Pick a username that will show on the leaderboard.</p>
+        </header>
+
+        <section class="card auth-card">
+            {% if email %}
+            <p class="auth-greeting">Signed in as <strong>{{ email }}</strong></p>
+            {% endif %}
+
+            <form method="post" class="username-form">
+                <label for="username">Username</label>
+                <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    maxlength="20"
+                    placeholder="e.g. wordmaster42"
+                    autocomplete="off"
+                    autofocus
+                    required
+                >
+                <p class="input-hint">3–20 characters, letters/numbers/underscores only.</p>
+
+                {% if error %}
+                <p class="form-error">{{ error }}</p>
+                {% endif %}
+
+                <button type="submit">Claim username</button>
+            </form>
+        </section>
+    </div>
+</body>
+</html>

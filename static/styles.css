@@ -419,6 +419,174 @@ tbody tr:hover {
     background: rgba(15, 23, 42, 0.1);
 }
 
+/* ---- Google sign-in button ---- */
+.google-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    color: #3c4043;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 999px;
+    transition: box-shadow 0.2s;
+}
+.google-btn:hover {
+    color: #3c4043;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+/* ---- User chip (logged-in state in header) ---- */
+.user-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.user-chip-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.link-button--muted {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--muted);
+}
+.link-button--muted:hover {
+    color: var(--text);
+}
+
+/* ---- Auth / setup-username page ---- */
+.auth-wrapper {
+    max-width: 480px;
+}
+.auth-card {
+    padding: 32px;
+}
+.auth-greeting {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+.username-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.username-form label {
+    font-weight: 600;
+    color: var(--muted);
+}
+.username-form input[type="text"] {
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    font-size: 1rem;
+    background: var(--soft);
+    transition: border 0.2s, box-shadow 0.2s;
+}
+.username-form input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(109, 93, 252, 0.15);
+}
+.input-hint {
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+.form-error {
+    color: #ef4444;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* ---- Dashboard ---- */
+.dashboard-profile {
+    padding: 28px;
+}
+.profile-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+.profile-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.profile-username {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.profile-email {
+    font-size: 0.875rem;
+    color: var(--muted);
+}
+
+/* ---- Public profile hero avatar ---- */
+.profile-hero-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 4px;
+}
+.profile-link {
+    text-decoration: none;
+    color: var(--primary);
+}
+.profile-link:hover {
+    text-decoration: underline;
+}
+
+/* ---- Player chip in records table ---- */
+.player-chip {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(109, 93, 252, 0.1);
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+.player-guest {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+/* ---- Header actions: multiple buttons ---- */
+.header-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
 @media (max-width: 600px) {
     #board-grid {
         grid-template-columns: repeat(4, 1fr);

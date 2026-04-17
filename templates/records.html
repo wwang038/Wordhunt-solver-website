@@ -54,6 +54,7 @@
                         <tr>
                             <th class="rank">Rank</th>
                             <th>Board</th>
+                            <th>Player</th>
                             <th class="score">Score</th>
                         </tr>
                     </thead>
@@ -63,8 +64,7 @@
                             <td class="rank">{{ ((page_number - 1) * 20) + loop.index }}</td>
                             <td>
                                 <div class="board-display">
-                                    {% set board = record[0] %}
-                                    {% set board_str = board|string %}
+                                    {% set board_str = record[0]|string %}
                                     {% if board_str|length == 16 %}
                                         {% for i in range(0, 16, 4) %}
                                             {{ board_str[i:i+4]|upper }}
@@ -74,6 +74,13 @@
                                         {{ board_str|upper }}
                                     {% endif %}
                                 </div>
+                            </td>
+                            <td>
+                                {% if record[2] and record[2] != 'guest' %}
+                                    <a href="/user/{{ record[2] }}" class="player-chip">{{ record[2] }}</a>
+                                {% else %}
+                                    <span class="player-guest">guest</span>
+                                {% endif %}
                             </td>
                             <td class="score">{{ record[1] }}</td>
                         </tr>

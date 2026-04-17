@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard – Word Hunt Solver</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="dashboard-page">
+    <div class="page-wrapper">
+        <header class="page-header">
+            <h1>Dashboard</h1>
+            <p class="hero-subtitle">Your personal Word Hunt stats.</p>
+            <div class="header-actions">
+                <a href="/" class="link-button">← Back to solver</a>
+                <a href="/records" class="link-button">Leaderboard →</a>
+                <a href="/logout" class="link-button link-button--muted">Log out</a>
+            </div>
+        </header>
+
+        <section class="card dashboard-profile">
+            <div class="profile-row">
+                <div class="profile-avatar">{{ username[0]|upper }}</div>
+                <div>
+                    <a href="/user/{{ username }}" class="profile-username profile-link">{{ username }}</a>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-pill">
+                    <span class="stat-label">Boards submitted</span>
+                    <span class="stat-value">{{ total_boards }}</span>
+                </div>
+                {% if boards %}
+                <div class="stat-pill">
+                    <span class="stat-label">Best score</span>
+                    <span class="stat-value">{{ boards[0][1] }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Your top boards</h2>
+            {% if boards %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="rank">#</th>
+                            <th>Board</th>
+                            <th class="score">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for board, score in boards %}
+                        <tr>
+                            <td class="rank">{{ loop.index }}</td>
+                            <td>
+                                <div class="board-display">
+                                    {% set s = board|string %}
+                                    {% if s|length == 16 %}
+                                        {% for i in range(0, 16, 4) %}
+                                            {{ s[i:i+4]|upper }}{% if i < 12 %}<br>{% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        {{ s|upper }}
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="score">{{ score }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="notice">No boards yet — go solve one!</p>
+            {% endif %}
+        </section>
+    </div>
+</body>
+</html>
