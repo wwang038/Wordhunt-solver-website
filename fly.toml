@@ -1,10 +1,12 @@
-# fly.toml app configuration file generated for word-hunt-solver-website on 2025-11-17T18:39:44-05:00
+# fly.toml app configuration file generated for word-hunt-solver-website-morning-mountain-1555 on 2026-04-17T04:24:22Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'word-hunt-solver-website'
-primary_region = 'ams'
+app = 'word-hunt-solver-website-morning-mountain-1555'
+primary_region = 'iad'
+
+[build]
 
 [http_service]
   internal_port = 8080
@@ -15,5 +17,7 @@ primary_region = 'ams'
   processes = ['app']
 
 [[vm]]
-  size = 'shared-cpu-2x'
-  memory = "1gb"
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 1024
